@@ -21,10 +21,12 @@ class Student:
 
 class UniversityAdmissions:
     def check_admission(self, student):
-        if student.get_average_score():
+        if student.get_average_score() >= 60:
             print("Congratulations, you are accepted!")
             return True
-        return False
+        else:
+            print("We regret to inform you that we will not be able to offer you admission.")
+            return False
 
 
 if __name__ == "__main__":
