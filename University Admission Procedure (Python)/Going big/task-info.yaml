@@ -1,0 +1,32 @@
+type: edu
+files:
+  - name: university.py
+    visible: true
+    learner_created: false
+  - name: test/__init__.py
+    visible: false
+    learner_created: false
+  - name: test/tests.py
+    visible: false
+    learner_created: false
+  - name: tests.py
+    visible: false
+    learner_created: false
+  - name: models/__init__.py
+    visible: true
+    learner_created: true
+  - name: utils/set_logging.py
+    visible: true
+    learner_created: true
+  - name: __init__.py
+    visible: true
+    learner_created: true
+  - name: models/student.py
+    visible: true
+    learner_created: true
+  - name: models/university_admissions.py
+    visible: true
+    learner_created: true
+feedback_link: https://hyperskill.org/projects/163/stages/846/implement#comment
+status: Solved
+record: 2
