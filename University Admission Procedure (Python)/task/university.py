@@ -1,6 +1,6 @@
 import logging
 
-from utils import set_logging
+from util import set_logging
 
 from models.university_admissions import UniversityAdmissions
 

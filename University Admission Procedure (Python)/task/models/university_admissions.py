@@ -1,7 +1,7 @@
 import logging
 
 from models.student import Student
-from utils.set_logging import init_debug_and_info_handlers
+from util.set_logging import init_debug_and_info_handlers
 
 # Create a logger
 logger = logging.getLogger(__name__)
