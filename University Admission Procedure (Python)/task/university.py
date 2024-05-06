@@ -2,7 +2,7 @@ import logging
 
 from util import set_logging
 
-from models.university_admissions import UniversityAdmissions
+from university_admissions import UniversityAdmissions
 
 # Create a logger
 logger = logging.getLogger(__name__)
@@ -15,5 +15,7 @@ if __name__ == "__main__":
     # university.check_admission(student)
 
     university = UniversityAdmissions()
-    university.admit_students()
-    university.display_admitted_students()
+    university.print_admitted_students()
+
+    # university.admit_students()
+    # university.display_admitted_students()
