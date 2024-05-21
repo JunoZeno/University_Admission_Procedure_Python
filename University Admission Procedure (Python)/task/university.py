@@ -9,13 +9,5 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     set_logging.init_debug_and_info_handlers(logger)
-    # student = Student()
-    # student.add_scores()
-    # logger.info(student.get_average_score())
-    # university.check_admission(student)
-
     university = UniversityAdmissions()
     university.print_admitted_students()
-
-    # university.admit_students()
-    # university.display_admitted_students()

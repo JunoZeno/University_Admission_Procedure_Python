@@ -8,26 +8,62 @@ init_debug_and_info_handlers(logger)
 
 
 class Student:
+    """
+    This class represents a Student applying for university admission.
+
+    Attributes:
+    - amount_scores_required: The number of test scores required for admission. Set to 3.
+    - first_name: The first name of the student.
+    - last_name: The last name of the student.
+    - test_scores: A list of the student's test scores in Physics, Chemistry, Mathematics, and Computer Science.
+    - priorities: A list of the student's department preferences in order of priority.
+    - scores: A list of the student's scores. Initialized as an empty list.
+    """
+
     amount_scores_required = 3
 
-    def __init__(self, first_name, last_name, gpa, first_choice, second_choice, third_choice):
+    def __init__(self, first_name, last_name, physics_test, chem_test, math_test, cs_test,
+                 first_choice, second_choice, third_choice):
+        """
+        This is the constructor method for the Student class.
+
+        It initializes the following attributes:
+        - first_name: The first name of the student.
+        - last_name: The last name of the student.
+        - test_scores: A list of the student's test scores in Physics, Chemistry, Mathematics, and Computer Science.
+        - priorities: A list of the student's department preferences in order of priority.
+        - scores: A list of the student's scores. Initialized as an empty list.
+        """
         self.first_name: str = first_name
         self.last_name: str = last_name
-        self.gpa: float = gpa
+        self.test_scores: list[int] = [physics_test, chem_test, math_test, cs_test]
         self.priorities = [first_choice, second_choice, third_choice]
         self.scores: list[float] = []
 
-    def add_scores(self):
-        for _ in range(Student.amount_scores_required):
-            score = int(input())
-            self.scores.append(score)
-        logger.debug(f'{self.first_name} scores are {self.scores}')
-
     def get_average_score(self):
+        """
+        This method calculates and returns the average of the student's scores.
+
+        :return: The average of the student's scores.
+        :rtype: float
+        """
         return sum(self.scores) / len(self.scores)
 
     def __repr__(self):
-        return f"Student(first_name='{self.first_name}', last_name='{self.last_name}', gpa={self.gpa}, priorities={self.priorities})"
+        """
+        This method returns a string representation of the Student object.
+
+        :return: A string representation of the Student object.
+        :rtype: str
+        """
+        return (f"Student(first_name='{self.first_name}', last_name='{self.last_name}', gpa={self.test_scores},"
+                f" priorities={self.priorities})")
 
     def __str__(self):
+        """
+        This method returns a string representation of the Student object, including the student's first name and average score.
+
+        :return: A string representation of the Student object, including the student's first name and average score.
+        :rtype: str
+        """
         return f"{self.first_name} {self.get_average_score()}"

@@ -12,16 +12,46 @@ init_debug_and_info_handlers(logger)
 class UniversityAdmissions:
 
     def __init__(self):
+        """
+        This is the constructor method for the UniversityAdmissions class.
+
+        It initializes the following attributes:
+        - number_of_accepted_students_per_dept: The number of students to be accepted per department. Initialized to 0.
+        - number_of_rejected_students: The number of students that were rejected. Initialized to 0.
+        - number_of_applicants: The total number of applicants. Initialized to 0.
+        - departments: A list of the departments in the university.
+        - test_score_student_index: A dictionary mapping each department to the index of the test score relevant to it.
+        - initial_students_list: A list of Student objects representing the initial applicants. It is populated by calling the receive_applicants method.
+        - accepted_students: A defaultdict mapping each department to a list of the students accepted to it. It is populated by calling the select_best_candidates method.
+        - rejected_students: A list of Student objects representing the students that were rejected. Initialized as an empty list.
+        """
         self.number_of_accepted_students_per_dept: int = 0
         self.number_of_rejected_students: int = 0
         self.number_of_applicants: int = 0
         self.departments = ['Biotech', 'Chemistry', 'Engineering', 'Mathematics', 'Physics']
+        self.test_score_student_index = {'Biotech': 1, 'Chemistry': 1, 'Engineering': 3, 'Mathematics': 2, 'Physics': 0}
         self.initial_students_list: list[Student] = self.receive_applicants()
         self.accepted_students: defaultdict[str, list] = self.select_best_candidates(self.initial_students_list,
                                                                                      self.number_of_accepted_students_per_dept)
         self.rejected_students: list[Student] = []
 
     def receive_applicants(self):
+        """
+        This method is responsible for receiving the applicants from a file and creating a list of Student objects.
+
+        It first reads the number of students to be accepted per department from the user input.
+        Then, it reads the 'applicants.txt' file line by line, where each line represents a student's data.
+        The data includes the student's first name, last name, test scores in physics, chemistry, mathematics, and computer science,
+        and their first, second, and third choices of department.
+
+        Each line is split into a list of strings, and the test scores are converted to integers.
+        A Student object is created with these data and appended to the students list.
+
+        The method returns the list of Student objects.
+
+        :return: A list of Student objects representing the applicants.
+        :rtype: list[Student]
+        """
         # create a list to store the student.py
         students: list[Student] = []
         # create a variable for number of student.py to be accepted
@@ -29,13 +59,18 @@ class UniversityAdmissions:
         # create a loop to get all the student.py
         with open('./applicants.txt', 'r') as file:
             for line in file:
-                data = line.strip().split(" ", 5)
+                data: list[str] = line.strip().split(" ", 9)
                 # Split the string into a list of substrings based on space
-                first_name, last_name, gpa, first_choice, second_choice, third_choice = data
-                # Convert gpa to float
-                gpa: float = float(gpa)
+                first_name, last_name, phs_test, chem_test, math_test, cs_test, first_choice, second_choice, third_choice = data
+                # convert the test scores to integer
+                phs_test = int(phs_test)
+                chem_test = int(chem_test)
+                math_test = int(math_test)
+                cs_test = int(cs_test)
                 # Create a Student instance
-                student: Student = Student(first_name, last_name, gpa, first_choice, second_choice, third_choice)
+                student: Student = Student(first_name, last_name, phs_test,
+                                           chem_test, math_test, cs_test,
+                                           first_choice, second_choice, third_choice)
                 logger.debug(f"{Student.__repr__(student)}")
                 # Append the student object to the student.py list
                 students.append(student)
@@ -43,26 +78,64 @@ class UniversityAdmissions:
         # return the student.py list
         return students
 
-    def sort_applicants(self, filtered_applicants: list[Student]):
+    def sort_applicants(self, filtered_applicants: list[Student], department: str):
+        """
+        This method sorts the applicants based on their GPA and name.
+
+        It first retrieves the index of the test score relevant to the department by calling the check_department method.
+        Then, it sorts the applicants in descending order of their test score and in ascending order of their name.
+        The sorted list of applicants is returned.
+
+        :param filtered_applicants: A list of Student objects representing the applicants to be sorted.
+        :type filtered_applicants: list[Student]
+        :param department: The department for which the applicants are to be sorted.
+        :type department: str
+        :return: A list of Student objects representing the sorted applicants.
+        :rtype: list[Student]
+        """
         logger.debug("Sorting applicants based on GPA and name...")
-        sorted_applicants = sorted(filtered_applicants, key=lambda x: (-x.gpa, x.first_name + x.last_name))
+        test_score_index = self.check_department(department)
+        sorted_applicants = sorted(filtered_applicants,
+                                   key=lambda x: (-x.test_scores[test_score_index], x.first_name + x.last_name))
         logger.debug("Applicants sorted.")
         return sorted_applicants
 
+    def check_department(self, department: str):
+        return self.test_score_student_index[department]
+
     def select_best_candidates(self, applicants: list[Student], n: int):
+        """
+        This method selects the best candidates for each department based on their test scores and priorities.
+
+        It first creates a copy of the applicants list and a defaultdict to store the admitted students.
+        Then, it iterates over the three priority levels and the departments.
+        For each department, it filters the applicants whose current priority is the department and sorts them.
+        The top candidates are selected from the sorted applicants based on the number of remaining spots in the department.
+        These candidates are added to the admitted students and removed from the remaining applicants.
+
+        After all the departments and priority levels have been processed, the admitted students are re-sorted.
+        The method returns the defaultdict mapping each department to a list of the students admitted to it.
+
+        :param applicants: A list of Student objects representing the initial applicants.
+        :type applicants: list[Student]
+        :param n: The number of students to be accepted per department.
+        :type n: int
+        :return: A defaultdict mapping each department to a list of the students admitted to it.
+        :rtype: defaultdict[str, list]
+        """
         logger.debug("Selecting best candidates for each department...")
-        departments = ['Biotech', 'Chemistry', 'Engineering', 'Mathematics', 'Physics']
+
         admitted_students = defaultdict(list)
         remaining_applicants = applicants.copy()
 
         for priority in range(3):
             logger.debug(f"Considering priority level {priority + 1}...")
-            for department in departments:
+            for department in self.departments:
                 logger.debug(f"Processing department: {department}")
                 filtered_applicants = [applicant for applicant in remaining_applicants if
                                        applicant.priorities[priority] == department]
                 logger.debug(f"Number of applicants for {department}: {len(filtered_applicants)}")
-                sorted_applicants = self.sort_applicants(filtered_applicants)
+                sorted_applicants = self.sort_applicants(filtered_applicants, department)
                 # Select the top candidates from the sorted applicants
                 selected_applicants = sorted_applicants[:max(0, n - len(admitted_students[department]))]
                 logger.debug(f"Number of selected applicants for {department}: {len(selected_applicants)}")
@@ -77,16 +150,35 @@ class UniversityAdmissions:
         return admitted_students
 
     def re_sort_accepted_students(self, admitted_students: defaultdict[str, list]):
+        """
+        This method re-sorts the admitted students for each department based on their GPA and name.
+
+        It iterates over the departments and for each department, it sorts the admitted students by calling the sort_applicants method.
+        The sorted list of students is then assigned back to the department in the admitted_students defaultdict.
+
+        :param admitted_students: A defaultdict mapping each department to a list of the students admitted to it.
+        :type admitted_students: defaultdict[str, list]
+        """
         for department in self.departments:
-            admitted_students[department] = self.sort_applicants(admitted_students[department])
+            admitted_students[department] = self.sort_applicants(admitted_students[department], department)
             logger.debug(f"Re-Sorted admitted students for {department}:")
 
     def print_admitted_students(self):
+        """
+        This method prints the admitted students for each department.
+
+        It first logs a debug message indicating the start of the printing process.
+        Then, it iterates over the departments. For each department, it logs the department name and the details of each student admitted to it.
+        The details include the student's first name, last name, and the test score relevant to the department.
+        After printing the students for a department, it logs an empty line for readability.
+        Finally, it logs a debug message indicating the end of the printing process.
+        """
         logger.debug("Printing admitted students for each department...")
 
         for department in self.departments:
             logger.info(department)
             for student in self.accepted_students[department]:
-                logger.info(f"{student.first_name} {student.last_name} {student.gpa}")
+                test_score_index = self.check_department(department)
+                logger.info(f"{student.first_name} {student.last_name} {student.test_scores[test_score_index]}")
             logger.info("")
         logger.debug("Admitted students printed.")
