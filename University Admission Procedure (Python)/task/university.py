@@ -10,4 +10,4 @@ logger = logging.getLogger(__name__)
 if __name__ == "__main__":
     set_logging.init_debug_and_info_handlers(logger)
     university = UniversityAdmissions()
-    university.print_admitted_students()
+    university.send_admitted_students_list_to_files()

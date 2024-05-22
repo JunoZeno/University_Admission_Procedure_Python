@@ -37,17 +37,25 @@ class Student:
         self.first_name: str = first_name
         self.last_name: str = last_name
         self.test_scores: list[int] = [physics_test, chem_test, math_test, cs_test]
+        self.req_test_scores_per_subject: dict[str, float] = {  # Added for easier access to test scores per subject
+            'Biotech': self.get_average_score([physics_test, chem_test]),
+            'Chemistry': chem_test,
+            'Engineering': self.get_average_score([math_test, cs_test]),
+            'Mathematics': math_test,
+            'Physics': self.get_average_score([physics_test, math_test])
+        }
         self.priorities = [first_choice, second_choice, third_choice]
         self.scores: list[float] = []
 
-    def get_average_score(self):
+    def get_average_score(self, scores: list[int]) -> float:
         """
         This method calculates and returns the average of the student's scores.
 
         :return: The average of the student's scores.
         :rtype: float
         """
-        return sum(self.scores) / len(self.scores)
+        # Make sure this returns one decimal place
+        return round(sum(scores) / len(scores), 1)
 
     def __repr__(self):
         """

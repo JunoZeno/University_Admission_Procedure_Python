@@ -29,7 +29,6 @@ class UniversityAdmissions:
         self.number_of_rejected_students: int = 0
         self.number_of_applicants: int = 0
         self.departments = ['Biotech', 'Chemistry', 'Engineering', 'Mathematics', 'Physics']
-        self.test_score_student_index = {'Biotech': 1, 'Chemistry': 1, 'Engineering': 3, 'Mathematics': 2, 'Physics': 0}
         self.initial_students_list: list[Student] = self.receive_applicants()
         self.accepted_students: defaultdict[str, list] = self.select_best_candidates(self.initial_students_list,
                                                                                      self.number_of_accepted_students_per_dept)
@@ -80,28 +79,25 @@ class UniversityAdmissions:
 
     def sort_applicants(self, filtered_applicants: list[Student], department: str):
         """
-        This method sorts the applicants based on their GPA and name.
+        This method sorts the applicants based on their test scores and names.
 
-        It first retrieves the index of the test score relevant to the department by calling the check_department method.
-        Then, it sorts the applicants in descending order of their test score and in ascending order of their name.
-        The sorted list of applicants is returned.
+        It first logs a debug message indicating the start of the sorting process.
+        Then, it sorts the applicants in descending order of their test scores relevant to the department.
+        If two applicants have the same test score, they are sorted in ascending order of their names.
+        The sorted list of applicants is then returned.
 
         :param filtered_applicants: A list of Student objects representing the applicants to be sorted.
         :type filtered_applicants: list[Student]
-        :param department: The department for which the applicants are to be sorted.
+        :param department: The department for which the applicants are being sorted.
         :type department: str
         :return: A list of Student objects representing the sorted applicants.
         :rtype: list[Student]
         """
-        logger.debug("Sorting applicants based on GPA and name...")
-        test_score_index = self.check_department(department)
+        logger.debug("Sorting applicants based on test scores and name...")
         sorted_applicants = sorted(filtered_applicants,
-                                   key=lambda x: (-x.test_scores[test_score_index], x.first_name + x.last_name))
+                                   key=lambda x: (-x.req_test_scores_per_subject[department], x.first_name + x.last_name))
         logger.debug("Applicants sorted.")
         return sorted_applicants
-
-    def check_department(self, department: str):
-        return self.test_score_student_index[department]
 
     def select_best_candidates(self, applicants: list[Student], n: int):
         """
@@ -178,7 +174,20 @@ class UniversityAdmissions:
         for department in self.departments:
             logger.info(department)
             for student in self.accepted_students[department]:
-                test_score_index = self.check_department(department)
-                logger.info(f"{student.first_name} {student.last_name} {student.test_scores[test_score_index]}")
+                logger.info(f"{student.first_name} {student.last_name} {student.req_test_scores_per_subject[department]}")
             logger.info("")
         logger.debug("Admitted students printed.")
+
+    def send_admitted_students_list_to_files(self):
+        """
+        This method sends the list of admitted students for each department to separate files.
+        :return:
+        """
+        logger.debug("Creating file for admitted students for each department...")
+
+        for department in self.departments:
+            department_file_name = department.lower() + ".txt"
+            with open(f'./{department_file_name}', 'w') as file:
+                for student in self.accepted_students[department]:
+                    file.write(f"{student.first_name} {student.last_name} {student.req_test_scores_per_subject[department]}\n")
+        logger.debug("Admitted students added to files.")
