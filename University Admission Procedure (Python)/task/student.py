@@ -12,18 +12,16 @@ class Student:
     This class represents a Student applying for university admission.
 
     Attributes:
-    - amount_scores_required: The number of test scores required for admission. Set to 3.
     - first_name: The first name of the student.
     - last_name: The last name of the student.
     - test_scores: A list of the student's test scores in Physics, Chemistry, Mathematics, and Computer Science.
+    - req_test_scores_per_subject: A dictionary mapping each subject to the student's test score in that subject.
+    - special_admissions_test: The student's score in the special admissions test.
     - priorities: A list of the student's department preferences in order of priority.
-    - scores: A list of the student's scores. Initialized as an empty list.
     """
 
-    amount_scores_required = 3
-
     def __init__(self, first_name, last_name, physics_test, chem_test, math_test, cs_test,
-                 first_choice, second_choice, third_choice):
+                 special_admissions_test, first_choice, second_choice, third_choice):
         """
         This is the constructor method for the Student class.
 
@@ -31,27 +29,30 @@ class Student:
         - first_name: The first name of the student.
         - last_name: The last name of the student.
         - test_scores: A list of the student's test scores in Physics, Chemistry, Mathematics, and Computer Science.
+        - req_test_scores_per_subject: A dictionary mapping each subject to the student's test score in that subject.
+        - special_admissions_test: The student's score in the special admissions test.
         - priorities: A list of the student's department preferences in order of priority.
-        - scores: A list of the student's scores. Initialized as an empty list.
         """
         self.first_name: str = first_name
         self.last_name: str = last_name
         self.test_scores: list[int] = [physics_test, chem_test, math_test, cs_test]
-        self.req_test_scores_per_subject: dict[str, float] = {  # Added for easier access to test scores per subject
+        self.req_test_scores_per_subject: dict[str, float] = {
             'Biotech': self.get_average_score([physics_test, chem_test]),
             'Chemistry': chem_test,
             'Engineering': self.get_average_score([math_test, cs_test]),
             'Mathematics': math_test,
             'Physics': self.get_average_score([physics_test, math_test])
         }
+        self.special_admissions_test = special_admissions_test
         self.priorities = [first_choice, second_choice, third_choice]
-        self.scores: list[float] = []
 
     def get_average_score(self, scores: list[int]) -> float:
         """
-        This method calculates and returns the average of the student's scores.
+        This method calculates and returns the average of the given scores.
 
-        :return: The average of the student's scores.
+        :param scores: A list of scores.
+        :type scores: list[int]
+        :return: The average of the scores.
         :rtype: float
         """
         # Make sure this returns one decimal place
@@ -64,8 +65,9 @@ class Student:
         :return: A string representation of the Student object.
         :rtype: str
         """
-        return (f"Student(first_name='{self.first_name}', last_name='{self.last_name}', gpa={self.test_scores},"
-                f" priorities={self.priorities})")
+        return (
+            f"Student(first_name='{self.first_name}', last_name='{self.last_name}', req_test_scores_per_subject={self.req_test_scores_per_subject},"
+            f" special_test={self.special_admissions_test}, priorities={self.priorities})")
 
     def __str__(self):
         """

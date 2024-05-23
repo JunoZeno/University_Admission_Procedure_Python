@@ -16,23 +16,16 @@ class UniversityAdmissions:
         This is the constructor method for the UniversityAdmissions class.
 
         It initializes the following attributes:
-        - number_of_accepted_students_per_dept: The number of students to be accepted per department. Initialized to 0.
-        - number_of_rejected_students: The number of students that were rejected. Initialized to 0.
-        - number_of_applicants: The total number of applicants. Initialized to 0.
-        - departments: A list of the departments in the university.
-        - test_score_student_index: A dictionary mapping each department to the index of the test score relevant to it.
+        - number_of_accepted_students_per_dept: The number of students to be accepted per department. Initialized as 0.
+        - departments: A list of the departments in the university. Initialized as ['Biotech', 'Chemistry', 'Engineering', 'Mathematics', 'Physics'].
         - initial_students_list: A list of Student objects representing the initial applicants. It is populated by calling the receive_applicants method.
-        - accepted_students: A defaultdict mapping each department to a list of the students accepted to it. It is populated by calling the select_best_candidates method.
-        - rejected_students: A list of Student objects representing the students that were rejected. Initialized as an empty list.
+        - accepted_students: A defaultdict mapping each department to a list of the students admitted to it. It is populated by calling the select_best_candidates method.
         """
         self.number_of_accepted_students_per_dept: int = 0
-        self.number_of_rejected_students: int = 0
-        self.number_of_applicants: int = 0
         self.departments = ['Biotech', 'Chemistry', 'Engineering', 'Mathematics', 'Physics']
         self.initial_students_list: list[Student] = self.receive_applicants()
         self.accepted_students: defaultdict[str, list] = self.select_best_candidates(self.initial_students_list,
                                                                                      self.number_of_accepted_students_per_dept)
-        self.rejected_students: list[Student] = []
 
     def receive_applicants(self):
         """
@@ -60,15 +53,18 @@ class UniversityAdmissions:
             for line in file:
                 data: list[str] = line.strip().split(" ", 9)
                 # Split the string into a list of substrings based on space
-                first_name, last_name, phs_test, chem_test, math_test, cs_test, first_choice, second_choice, third_choice = data
+                first_name, last_name, phs_test, chem_test, math_test, cs_test, \
+                    special_admissions_test, first_choice, second_choice, third_choice = data
                 # convert the test scores to integer
                 phs_test = int(phs_test)
                 chem_test = int(chem_test)
                 math_test = int(math_test)
                 cs_test = int(cs_test)
+                special_admissions_test = int(special_admissions_test)
                 # Create a Student instance
                 student: Student = Student(first_name, last_name, phs_test,
                                            chem_test, math_test, cs_test,
+                                           special_admissions_test,
                                            first_choice, second_choice, third_choice)
                 logger.debug(f"{Student.__repr__(student)}")
                 # Append the student object to the student.py list
@@ -82,7 +78,8 @@ class UniversityAdmissions:
         This method sorts the applicants based on their test scores and names.
 
         It first logs a debug message indicating the start of the sorting process.
-        Then, it sorts the applicants in descending order of their test scores relevant to the department.
+        Then, it sorts the applicants in descending order of their test scores relevant to the department
+        or the special admissions test. Whichever is the highest will be used for admissions consideration.
         If two applicants have the same test score, they are sorted in ascending order of their names.
         The sorted list of applicants is then returned.
 
@@ -94,8 +91,13 @@ class UniversityAdmissions:
         :rtype: list[Student]
         """
         logger.debug("Sorting applicants based on test scores and name...")
-        sorted_applicants = sorted(filtered_applicants,
-                                   key=lambda x: (-x.req_test_scores_per_subject[department], x.first_name + x.last_name))
+        sorted_applicants = sorted(
+            filtered_applicants,
+            key=lambda x: (
+                -max(x.req_test_scores_per_subject[department], x.special_admissions_test),
+                x.first_name + x.last_name
+            )
+        )
         logger.debug("Applicants sorted.")
         return sorted_applicants
 
@@ -158,6 +160,7 @@ class UniversityAdmissions:
         for department in self.departments:
             admitted_students[department] = self.sort_applicants(admitted_students[department], department)
             logger.debug(f"Re-Sorted admitted students for {department}:")
+            logger.debug(admitted_students[department])
 
     def print_admitted_students(self):
         """
@@ -174,7 +177,8 @@ class UniversityAdmissions:
         for department in self.departments:
             logger.info(department)
             for student in self.accepted_students[department]:
-                logger.info(f"{student.first_name} {student.last_name} {student.req_test_scores_per_subject[department]}")
+                logger.info(
+                    f"{student.first_name} {student.last_name} {student.req_test_scores_per_subject[department]}")
             logger.info("")
         logger.debug("Admitted students printed.")
 
@@ -189,5 +193,6 @@ class UniversityAdmissions:
             department_file_name = department.lower() + ".txt"
             with open(f'./{department_file_name}', 'w') as file:
                 for student in self.accepted_students[department]:
-                    file.write(f"{student.first_name} {student.last_name} {student.req_test_scores_per_subject[department]}\n")
+                    file.write(
+                        f"{student.first_name} {student.last_name} {max(student.req_test_scores_per_subject[department], student.special_admissions_test)}\n")
         logger.debug("Admitted students added to files.")
